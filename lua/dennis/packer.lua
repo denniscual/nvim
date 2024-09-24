@@ -132,4 +132,15 @@ return require('packer').startup(function(use)
 
   -- Git Fuginitive
   use("tpope/vim-fugitive")
+
+
+  -- Tailwindcss
+  use {
+    'luckasRanarison/tailwind-tools.nvim',
+    requires = {
+       {'nvim-treesitter/nvim-treesitter'},
+       {'nvim-telescope/telescope.nvim'},
+       {'neovim/nvim-lspconfig'}
+    }
+  }
 end)

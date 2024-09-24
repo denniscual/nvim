@@ -4,3 +4,7 @@ const
 isBuildPotentiallyStale
 test
 module
+BRANCH_NAME
+html
+it
+overrideWebpackConfig
