@@ -6,7 +6,8 @@ lsp.ensure_installed({
   'ts_ls',
   'rust_analyzer',
   'eslint',
-  'tailwindcss'
+  'tailwindcss',
+  "biome"
 })
 
 -- Fix Undefined global 'vim'
