@@ -156,4 +156,12 @@ return require('packer').startup(function(use)
       "nvim-lua/plenary.nvim",
     },
   })
+
+  -- Oil
+  use({
+    "stevearc/oil.nvim",
+    config = function()
+      require("oil").setup()
+    end,
+  })
 end)
