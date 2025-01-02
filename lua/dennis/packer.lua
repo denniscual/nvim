@@ -147,4 +147,14 @@ return require('packer').startup(function(use)
        {'neovim/nvim-lspconfig'}
     }
   }
+
+  -- Lazygit
+  use({
+      "kdheepak/lazygit.nvim",
+      -- optional for floating window border decoration
+      requires = {
+          "nvim-lua/plenary.nvim",
+      },
+  })
 end)
+
