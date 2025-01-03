@@ -8,14 +8,6 @@ return require('packer').startup(function(use)
   use 'wbthomason/packer.nvim'
 
   use {
-    'MunifTanjim/prettier.nvim',
-    requires = {
-      { 'neovim/nvim-lspconfig' },
-      { 'jose-elias-alvarez/null-ls.nvim' }
-    }
-  }
-
-  use {
     'nvim-telescope/telescope.nvim',
     requires = { { 'nvim-lua/plenary.nvim' } }
   }
