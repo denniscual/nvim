@@ -155,5 +155,9 @@ return require('packer').startup(function(use)
     end,
   })
 
-  use("lewis6991/gitsigns.nvim")
+  -- Git signs
+  use "lewis6991/gitsigns.nvim"
+
+  -- Indent blankline
+  use "lukas-reineke/indent-blankline.nvim"
 end)
