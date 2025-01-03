@@ -164,4 +164,6 @@ return require('packer').startup(function(use)
       require("oil").setup()
     end,
   })
+
+  use("lewis6991/gitsigns.nvim")
 end)
