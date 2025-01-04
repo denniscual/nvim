@@ -61,4 +61,7 @@ vim.keymap.set('n', 'Y', '"+y', { noremap = true, silent = true })
 -- Visual mode mapping for Y to copy to system clipboard
 vim.keymap.set('v', 'Y', '"+y', { noremap = true, silent = true })
 
+-- Jump to previously visited buffer
+vim.keymap.set('n', '<leader>bb', "<cmd>b#<CR>", { noremap = true, silent = true })
+
 
