@@ -28,7 +28,5 @@ vim.opt.isfname:append("@-@")
 
 vim.opt.updatetime = 50
 
-vim.opt.splitright = true       -- Vertical split to the right
-vim.opt.splitbelow = true       -- Horizontal split to the bottom
-
-
+vim.opt.splitright = true -- Vertical split to the right
+vim.opt.splitbelow = true -- Horizontal split to the bottom

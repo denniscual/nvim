@@ -15,20 +15,20 @@ vim.keymap.set("n", "n", "nzzzv")
 vim.keymap.set("n", "N", "Nzzzv")
 
 vim.keymap.set("n", "<leader>vwm", function()
-    require("vim-with-me").StartVimWithMe()
+	require("vim-with-me").StartVimWithMe()
 end)
 vim.keymap.set("n", "<leader>svwm", function()
-    require("vim-with-me").StopVimWithMe()
+	require("vim-with-me").StopVimWithMe()
 end)
 
 -- greatest remap ever
 vim.keymap.set("x", "<leader>p", [["_dP]])
 
 -- next greatest remap ever : asbjornHaland
-vim.keymap.set({"n", "v"}, "<leader>y", [["+y]])
+vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]])
 vim.keymap.set("n", "<leader>Y", [["+Y]])
 
-vim.keymap.set({"n", "v"}, "<leader>d", [["_d]])
+vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]])
 
 -- This is going to get me cancelled
 vim.keymap.set("i", "<C-c>", "<Esc>")
@@ -45,23 +45,21 @@ vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz")
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
 vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true })
 
-vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.dotfiles/nvim/.config/nvim/lua/dennis/packer.lua<CR>");
-vim.keymap.set("n", "<leader>mr", "<cmd>CellularAutomaton make_it_rain<CR>");
+vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.dotfiles/nvim/.config/nvim/lua/dennis/packer.lua<CR>")
+vim.keymap.set("n", "<leader>mr", "<cmd>CellularAutomaton make_it_rain<CR>")
 
 -- This make sure "harpoon" or any plugin that uses the same keymap doesn't replace the default.
-vim.keymap.set('n', '<C-e>', '<C-e>', { noremap = true, silent = true })
+vim.keymap.set("n", "<C-e>", "<C-e>", { noremap = true, silent = true })
 
 vim.keymap.set("n", "<leader><leader>", function()
-    vim.cmd("so")
+	vim.cmd("so")
 end)
 
 -- Normal mode mapping for Y to copy to system clipboard
-vim.keymap.set('n', 'Y', '"+y', { noremap = true, silent = true })
+vim.keymap.set("n", "Y", '"+y', { noremap = true, silent = true })
 
 -- Visual mode mapping for Y to copy to system clipboard
-vim.keymap.set('v', 'Y', '"+y', { noremap = true, silent = true })
+vim.keymap.set("v", "Y", '"+y', { noremap = true, silent = true })
 
 -- Jump to previously visited buffer
-vim.keymap.set('n', '<leader>bb', "<cmd>b#<CR>", { noremap = true, silent = true })
-
-
+vim.keymap.set("n", "<leader>bb", "<cmd>b#<CR>", { noremap = true, silent = true })
