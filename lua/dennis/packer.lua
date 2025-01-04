@@ -152,4 +152,7 @@ return require('packer').startup(function(use)
 
   -- Indent blankline
   use "lukas-reineke/indent-blankline.nvim"
+
+  -- None-ls
+  use "nvimtools/none-ls.nvim"
 end)
