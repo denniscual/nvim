@@ -164,4 +164,13 @@ return require("packer").startup(function(use)
 
 	-- None-ls
 	use("nvimtools/none-ls.nvim")
+
+	use({
+		"CopilotC-Nvim/CopilotChat.nvim",
+		requires = {
+			{ "github/copilot.vim" }, -- or zbirenbaum/copilot.lua
+			{ "nvim-lua/plenary.nvim", branch = "master" }, -- for curl, log and async functions
+		},
+		run = "make tiktoken",
+	})
 end)
