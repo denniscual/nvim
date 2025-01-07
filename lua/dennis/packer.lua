@@ -173,9 +173,4 @@ return require("packer").startup(function(use)
 		},
 		run = "make tiktoken",
 	})
-
-	use({
-		"MeanderingProgrammer/render-markdown.nvim",
-		after = { "nvim-treesitter" },
-	})
 end)
