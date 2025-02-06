@@ -30,3 +30,5 @@ vim.opt.updatetime = 50
 
 vim.opt.splitright = true -- Vertical split to the right
 vim.opt.splitbelow = true -- Horizontal split to the bottom
+
+vim.opt.winbar = "%m %{expand('%:h:t')}/%t" -- Show the filename at the top-left of the buffer.
