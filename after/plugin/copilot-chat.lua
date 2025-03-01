@@ -1,6 +1,8 @@
 local copilotChat = require("CopilotChat")
 
-copilotChat.setup()
+copilotChat.setup({
+	model = "claude-3.5-sonnet",
+})
 
 -- Open Chat Window
 vim.api.nvim_set_keymap("n", "<leader>ccw", "<cmd>CopilotChatToggle<CR>", { noremap = true, silent = true })
