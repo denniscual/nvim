@@ -1,7 +1,7 @@
 local copilotChat = require("CopilotChat")
 
 copilotChat.setup({
-	model = "claude-3.7-sonnet",
+	model = "claude-sonnet-4",
 })
 
 -- Open Chat Window
