@@ -160,7 +160,7 @@ return require("packer").startup(function(use)
 	use("lewis6991/gitsigns.nvim")
 
 	-- Indent blankline
-	use("lukas-reineke/indent-blankline.nvim")
+	-- use("lukas-reineke/indent-blankline.nvim")
 
 	-- None-ls
 	use("nvimtools/none-ls.nvim")
