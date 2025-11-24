@@ -132,6 +132,7 @@ return require("packer").startup(function(use)
 	-- Tailwindcss
 	use({
 		"luckasRanarison/tailwind-tools.nvim",
+		build = ":UpdateRemotePlugins",
 		requires = {
 			{ "nvim-treesitter/nvim-treesitter" },
 			{ "nvim-telescope/telescope.nvim" },
