@@ -8,6 +8,7 @@ lsp.ensure_installed({
 	"eslint",
 	"tailwindcss",
 	"biome",
+	"graphql",
 })
 
 -- Fix Undefined global 'vim'
