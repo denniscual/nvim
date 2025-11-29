@@ -1,16 +1,16 @@
 -- Disable copilot by default
-vim.g.copilot_enabled = 0
-
-vim.api.nvim_create_user_command("CopilotToggle", function()
-	if vim.g.copilot_enabled == 0 then
-		vim.g.copilot_enabled = 1
-		vim.cmd("Copilot enable")
-		print("Copilot enabled")
-	else
-		vim.g.copilot_enabled = 0
-		vim.cmd("Copilot disable")
-		print("Copilot disabled")
-	end
-end, {})
-
-vim.keymap.set("n", "<leader>cp", "<cmd>CopilotToggle<CR>", { desc = "Toggle Copilot" })
+-- vim.g.copilot_enabled = 0
+--
+-- vim.api.nvim_create_user_command("CopilotToggle", function()
+-- 	if vim.g.copilot_enabled == 0 then
+-- 		vim.g.copilot_enabled = 1
+-- 		vim.cmd("Copilot enable")
+-- 		print("Copilot enabled")
+-- 	else
+-- 		vim.g.copilot_enabled = 0
+-- 		vim.cmd("Copilot disable")
+-- 		print("Copilot disabled")
+-- 	end
+-- end, {})
+--
+-- vim.keymap.set("n", "<leader>cp", "<cmd>CopilotToggle<CR>", { desc = "Toggle Copilot" })
