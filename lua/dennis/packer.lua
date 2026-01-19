@@ -149,6 +149,17 @@ return require("packer").startup(function(use)
 		},
 	})
 
+	use({
+		"samir-roy/code-bridge.nvim",
+	})
+
+	use({
+		"MeanderingProgrammer/render-markdown.nvim",
+		after = { "nvim-treesitter" },
+		-- requires = { 'nvim-mini/mini.icons', opt = true },        -- if you use standalone mini plugins
+		-- requires = { 'nvim-tree/nvim-web-devicons', opt = true }, -- if you prefer nvim-web-devicons
+	})
+
 	-- Oil
 	use({
 		"stevearc/oil.nvim",
