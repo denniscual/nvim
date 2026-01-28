@@ -18,4 +18,9 @@ require("treesitter-context").setup({
 local leader_ts_context = "<leader>t"
 
 -- Context toggle
-vim.keymap.set("n", leader_ts_context .. "t", ":TSContextToggle<CR>", { noremap = true, silent = true })
+vim.keymap.set(
+	"n",
+	leader_ts_context .. "t",
+	":TSContext toggle<CR>",
+	{ noremap = true, silent = true, desc = "Toggle Treesitter Context" }
+)
