@@ -160,6 +160,12 @@ return require("packer").startup(function(use)
 		-- requires = { 'nvim-tree/nvim-web-devicons', opt = true }, -- if you prefer nvim-web-devicons
 	})
 
+	-- Toggle terminal
+	use({
+		"akinsho/toggleterm.nvim",
+		tag = "*",
+	})
+
 	-- Oil
 	use({
 		"stevearc/oil.nvim",

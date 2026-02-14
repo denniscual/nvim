@@ -7,8 +7,8 @@ require("code-bridge").setup({
 
 -- For Claude Code
 
-vim.keymap.set("n", "<leader>ct", ":CodeBridgeTmux<CR>", { desc = "Send file to claude" })
-vim.keymap.set("v", "<leader>ct", ":CodeBridgeTmux<CR>", { desc = "Send selection to claude" })
+-- vim.keymap.set("n", "<leader>ct", ":CodeBridgeTmux<CR>", { desc = "Send file to claude" })
+-- vim.keymap.set("v", "<leader>ct", ":CodeBridgeTmux<CR>", { desc = "Send selection to claude" })
 vim.keymap.set("n", "<leader>cd", ":CodeBridgeTmuxDiffStaged<CR>", { desc = "Send git git staged to claude" })
 
 -- Chat interface
