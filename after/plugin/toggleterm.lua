@@ -18,16 +18,25 @@ require("toggleterm").setup({
 })
 
 local trim_spaces = true
+local terms = require("toggleterm.terminal")
 
--- Send visual selection to terminal, then open it
+local function ensure_open(id)
+	local term = terms.get(id)
+	if term and not term:is_open() then
+		term:open()
+	end
+end
+
+-- Send visual selection to terminal and open it
 vim.keymap.set("v", "<leader>ct", function()
+	local id = vim.v.count1
 	require("toggleterm").send_lines_to_terminal("visual_selection", trim_spaces, { args = vim.v.count })
-	vim.schedule(function()
-		vim.cmd(vim.v.count1 .. "ToggleTerm")
-	end)
+	vim.defer_fn(function()
+		ensure_open(id)
+	end, 100)
 end, { desc = "Send selection to terminal" })
 
--- Send whole file to terminal, then open it
+-- Send whole file to terminal and open it
 local set_opfunc = vim.fn[vim.api.nvim_exec2(
 	[[
 	func s:set_opfunc(val)
@@ -39,11 +48,12 @@ local set_opfunc = vim.fn[vim.api.nvim_exec2(
 ).output]
 
 vim.keymap.set("n", "<leader>ct", function()
+	local id = vim.v.count1
 	set_opfunc(function(motion_type)
 		require("toggleterm").send_lines_to_terminal(motion_type, false, { args = vim.v.count })
-		vim.schedule(function()
-			vim.cmd(vim.v.count1 .. "ToggleTerm")
-		end)
+		vim.defer_fn(function()
+			ensure_open(id)
+		end, 100)
 	end)
 	vim.api.nvim_feedkeys("ggg@G''", "n", false)
 end, { desc = "Send file to terminal" })
