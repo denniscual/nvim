@@ -61,5 +61,12 @@ vim.keymap.set("n", "Y", '"+y', { noremap = true, silent = true })
 -- Visual mode mapping for Y to copy to system clipboard
 vim.keymap.set("v", "Y", '"+y', { noremap = true, silent = true })
 
+-- Copy current file path to system clipboard
+vim.keymap.set("n", "<leader>cp", function()
+	local path = vim.fn.expand("%:.")
+	vim.fn.setreg("+", path)
+	print("Copied: " .. path)
+end, { noremap = true, silent = false, desc = "Copy file path to clipboard" })
+
 -- Jump to previously visited buffer
 vim.keymap.set("n", "<leader>bb", "<cmd>b#<CR>", { noremap = true, silent = true })
