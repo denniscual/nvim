@@ -46,7 +46,10 @@ return require("packer").startup(function(use)
 		branch = "v1.x",
 		requires = {
 			-- LSP Support
-			{ "neovim/nvim-lspconfig" },
+			-- Pinned to v2.5.0: the next release deprecates the `require('lspconfig')`
+			-- framework that lsp-zero v1 drives servers through, and will delete it in
+			-- v3.0.0. Unpin once lsp-zero is retired (see TASKS/lsp-zero-migration.md).
+			{ "neovim/nvim-lspconfig", tag = "v2.5.0" },
 			{ "williamboman/mason.nvim" },
 			{ "williamboman/mason-lspconfig.nvim" },
 
