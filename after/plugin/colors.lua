@@ -5,7 +5,11 @@ require("rose-pine").setup({
 	dark_variant = "main", -- main (default), moon, or dawn
 })
 
+-- https://github.com/ellisonleao/gruvbox.nvim
+require("gruvbox").setup({})
+
 function ColorMyPencils(color)
+	-- color = color or "rose-pine"
 	color = color or "rose-pine"
 	vim.cmd.colorscheme(color)
 

@@ -20,6 +20,8 @@ return require("packer").startup(function(use)
 		end,
 	})
 
+	use({ "ellisonleao/gruvbox.nvim" })
+
 	use("xiyaowong/transparent.nvim")
 
 	use("folke/trouble.nvim")
