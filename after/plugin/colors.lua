@@ -8,9 +8,12 @@ require("rose-pine").setup({
 -- https://github.com/ellisonleao/gruvbox.nvim
 require("gruvbox").setup({})
 
+-- https://github.com/Mofiqul/dracula.nvim
+require("dracula").setup({})
+
 function ColorMyPencils(color)
-	-- color = color or "rose-pine"
 	color = color or "rose-pine"
+	-- color = color or "dracula"
 	vim.cmd.colorscheme(color)
 
 	vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
