@@ -190,6 +190,9 @@ return require("packer").startup(function(use)
 	-- None-ls
 	use("nvimtools/none-ls.nvim")
 
+	-- Oxlint (oxc_language_server) as an LSP client
+	use("soulsam480/nvim-oxlint")
+
 	-- use({
 	-- 	"CopilotC-Nvim/CopilotChat.nvim",
 	-- 	requires = {
