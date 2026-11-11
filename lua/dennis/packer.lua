@@ -30,13 +30,8 @@ return require("packer").startup(function(use)
 
 	use({
 		"nvim-treesitter/nvim-treesitter",
-		tag = "v0.9.2",
-		run = function()
-			local ts_update = require("nvim-treesitter.install").update({ with_sync = true })
-			ts_update()
-		end,
+		run = ":TSUpdate",
 	})
-	use("nvim-treesitter/playground")
 	use({
 		"ThePrimeagen/harpoon",
 		branch = "harpoon2",
@@ -55,7 +50,7 @@ return require("packer").startup(function(use)
 			-- v3.0.0. Unpin once lsp-zero is retired (see TASKS/lsp-zero-migration.md).
 			{ "neovim/nvim-lspconfig", tag = "v2.5.0" },
 			{ "williamboman/mason.nvim" },
-			{ "williamboman/mason-lspconfig.nvim" },
+			{ "williamboman/mason-lspconfig.nvim", tag = "v1.32.0" },
 
 			-- Autocompletion
 			{ "hrsh7th/nvim-cmp" },
