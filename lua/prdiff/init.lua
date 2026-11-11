@@ -12,6 +12,46 @@ M.config = {
 local layouts = { unified = "prdiff.unified" }
 
 local state
+local sidebar_width
+local saved_tabline
+
+-- Like the default tabline, minus the close button, with the PR diff tab named.
+function M.tabline()
+	local parts = {}
+	local current = vim.api.nvim_get_current_tabpage()
+	for i, tab in ipairs(vim.api.nvim_list_tabpages()) do
+		local label
+		if state and tab == state.tab then
+			label = "PR diff"
+		else
+			local wins = vim.tbl_filter(function(w)
+				return vim.api.nvim_win_get_config(w).relative == ""
+			end, vim.api.nvim_tabpage_list_wins(tab))
+			local buf = vim.api.nvim_win_get_buf(vim.api.nvim_tabpage_get_win(tab))
+			local name = vim.api.nvim_buf_get_name(buf)
+			name = name == "" and "[No Name]" or vim.fn.pathshorten(vim.fn.fnamemodify(name, ":~:."))
+			local modified = vim.iter(wins):any(function(w)
+				return vim.bo[vim.api.nvim_win_get_buf(w)].modified
+			end)
+			label = (#wins > 1 and #wins .. (modified and "+" or "") .. " " or (modified and "+ " or "")) .. name
+		end
+		local hl = tab == current and "%#TabLineSel#" or "%#TabLine#"
+		table.insert(parts, hl .. "%" .. i .. "T " .. label:gsub("%%", "%%%%") .. " ")
+	end
+	return table.concat(parts) .. "%#TabLineFill#%T"
+end
+
+local function use_tabline()
+	saved_tabline = vim.o.tabline
+	vim.o.tabline = "%!v:lua.require'prdiff'.tabline()"
+end
+
+local function restore_tabline()
+	if saved_tabline then
+		vim.o.tabline = saved_tabline
+		saved_tabline = nil
+	end
+end
 
 local function set_highlights()
 	local links = {
@@ -186,7 +226,7 @@ local function keymaps()
 		end, "previous file")
 		map(buf, "g?", function()
 			vim.notify(table.concat({
-				"Sidebar: <CR> open diff / toggle folder · o preview · <Tab> focus diff",
+				"Sidebar: <CR> open diff / toggle folder · o preview · </> resize · <Tab> focus diff",
 				"Diff:    ]c/[c hunk · <CR> open file at line · <Tab> focus sidebar",
 				"Both:    gf open file in right split · ]f/[f file · R refresh · q close",
 			}, "\n"))
@@ -210,6 +250,12 @@ local function keymaps()
 	map(sb, "<Tab>", function()
 		vim.api.nvim_set_current_win(state.diff_win)
 	end, "focus diff")
+	map(sb, ">", function()
+		vim.cmd("vertical resize +5")
+	end, "widen sidebar")
+	map(sb, "<", function()
+		vim.cmd("vertical resize -5")
+	end, "narrow sidebar")
 
 	map(db, "]c", function()
 		step_hunk(1)
@@ -291,7 +337,7 @@ function M.open(ref)
 	local sidebar_win = vim.api.nvim_get_current_win()
 	local sidebar_buf = scratch("prdiff://files", "prdiff-files")
 	vim.api.nvim_win_set_buf(sidebar_win, sidebar_buf)
-	vim.api.nvim_win_set_width(sidebar_win, M.config.sidebar_width)
+	vim.api.nvim_win_set_width(sidebar_win, sidebar_width or M.config.sidebar_width)
 
 	local common = { number = false, relativenumber = false, signcolumn = "no", foldcolumn = "0",
 		wrap = false, list = false, spell = false, cursorline = true }
@@ -313,6 +359,7 @@ function M.open(ref)
 		diff_win = diff_win,
 		diff_buf = diff_buf,
 	}
+	use_tabline()
 	keymaps()
 	sidebar.render(state)
 	M.show(1, false)
@@ -322,15 +369,30 @@ function M.close()
 	if not state then
 		return
 	end
-	local tab = state.tab
+	local closing = state
 	state = nil
-	if not vim.api.nvim_tabpage_is_valid(tab) then
+	restore_tabline()
+	if vim.api.nvim_win_is_valid(closing.sidebar_win) then
+		sidebar_width = vim.api.nvim_win_get_width(closing.sidebar_win)
+	end
+	if not vim.api.nvim_tabpage_is_valid(closing.tab) then
 		return
 	end
-	if #vim.api.nvim_list_tabpages() > 1 then
-		vim.cmd.tabclose(vim.api.nvim_tabpage_get_number(tab))
+
+	local others = vim.tbl_filter(function(w)
+		return w ~= closing.sidebar_win and w ~= closing.diff_win and vim.api.nvim_win_get_config(w).relative == ""
+	end, vim.api.nvim_tabpage_list_wins(closing.tab))
+	if #others > 0 then
+		-- Files opened from the diff stay open; only the PR diff panes go away.
+		for _, w in ipairs({ closing.sidebar_win, closing.diff_win }) do
+			if vim.api.nvim_win_is_valid(w) then
+				vim.api.nvim_win_close(w, true)
+			end
+		end
+	elseif #vim.api.nvim_list_tabpages() > 1 then
+		vim.cmd.tabclose(vim.api.nvim_tabpage_get_number(closing.tab))
 	else
-		vim.api.nvim_set_current_tabpage(tab)
+		vim.api.nvim_set_current_tabpage(closing.tab)
 		vim.cmd("enew")
 		vim.cmd("only")
 	end
@@ -339,9 +401,16 @@ end
 function M.setup(opts)
 	M.config = vim.tbl_deep_extend("force", M.config, opts or {})
 	set_highlights()
-	vim.api.nvim_create_autocmd("ColorScheme", {
-		group = vim.api.nvim_create_augroup("prdiff", { clear = true }),
-		callback = set_highlights,
+	local group = vim.api.nvim_create_augroup("prdiff", { clear = true })
+	vim.api.nvim_create_autocmd("ColorScheme", { group = group, callback = set_highlights })
+	vim.api.nvim_create_autocmd("TabClosed", {
+		group = group,
+		callback = function()
+			if state and not vim.api.nvim_tabpage_is_valid(state.tab) then
+				state = nil
+				restore_tabline()
+			end
+		end,
 	})
 	vim.api.nvim_create_user_command("PrDiff", function(o)
 		M.open(o.args)
