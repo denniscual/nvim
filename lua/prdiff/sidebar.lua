@@ -32,7 +32,7 @@ local function build_tree(files)
 	return root
 end
 
-local function flatten(node, depth, out)
+local function flatten(node, depth, out, collapsed, prefix)
 	local dirs, leaves = {}, {}
 	for _, entry in ipairs(node.order) do
 		if type(entry) == "string" then
@@ -42,13 +42,17 @@ local function flatten(node, depth, out)
 		end
 	end
 	for _, dir in ipairs(dirs) do
-		local name = dir.name
+		local name, path = dir.name, prefix .. dir.name
 		while #dir.order == 1 and type(dir.order[1]) == "string" do
 			dir = dir.children[dir.order[1]]
 			name = name .. "/" .. dir.name
+			path = path .. "/" .. dir.name
 		end
-		table.insert(out, { dir = name, depth = depth })
-		flatten(dir, depth + 1, out)
+		local closed = collapsed and collapsed[path] or false
+		table.insert(out, { dir = name, path = path, depth = depth, closed = closed })
+		if not closed then
+			flatten(dir, depth + 1, out, collapsed, path .. "/")
+		end
 	end
 	for _, leaf in ipairs(leaves) do
 		table.insert(out, { file = leaf.file, name = leaf.name, depth = depth })
@@ -59,7 +63,7 @@ end
 -- Files in the order the tree shows them, so stepping through files follows the sidebar.
 function M.sort(files)
 	local sorted = {}
-	for _, item in ipairs(flatten(build_tree(files), 0, {})) do
+	for _, item in ipairs(flatten(build_tree(files), 0, {}, nil, "")) do
 		if item.file then
 			table.insert(sorted, files[item.file])
 		end
@@ -80,7 +84,7 @@ function M.render(state)
 		string.format(" vs %s @ %s", state.base.label, state.base.sha:sub(1, 7)),
 		"",
 	}
-	local items = flatten(build_tree(files), 0, {})
+	local items = flatten(build_tree(files), 0, {}, state.collapsed, "")
 	local marks = {}
 	state.rows = {}
 
@@ -88,7 +92,8 @@ function M.render(state)
 		local indent = string.rep("  ", item.depth + 1)
 		local row = #lines
 		if item.dir then
-			table.insert(lines, indent .. " " .. item.dir .. "/")
+			table.insert(lines, indent .. (item.closed and "▸ " or "▾ ") .. item.dir .. "/")
+			state.rows[row + 1] = { dir = item.path }
 			table.insert(marks, { row, 0, -1, "PrDiffDir" })
 		else
 			local file = files[item.file]
@@ -105,7 +110,7 @@ function M.render(state)
 				table.insert(marks, { row, #text - #item.name, #text, "PrDiffDeletedName" })
 			end
 			table.insert(marks, { row, stats = file })
-			state.rows[row + 1] = item.file
+			state.rows[row + 1] = { file = item.file }
 		end
 	end
 
@@ -143,25 +148,49 @@ function M.render(state)
 			})
 		end
 	end
-	M.mark_current(state)
+	M.mark_current(state, false)
 end
 
-function M.mark_current(state)
+function M.mark_current(state, move_cursor)
 	local buf = state.sidebar_buf
 	vim.api.nvim_buf_clear_namespace(buf, ns_current, 0, -1)
-	for row, idx in pairs(state.rows) do
-		if idx == state.current then
+	for row, item in pairs(state.rows) do
+		if item.file == state.current then
 			vim.api.nvim_buf_set_extmark(buf, ns_current, row - 1, 0, { line_hl_group = "PrDiffSelected", priority = 5 })
-			if vim.api.nvim_win_is_valid(state.sidebar_win) then
+			if move_cursor and vim.api.nvim_win_is_valid(state.sidebar_win) then
 				vim.api.nvim_win_set_cursor(state.sidebar_win, { row, 0 })
 			end
 		end
 	end
 end
 
-function M.file_at_cursor(state)
+function M.item_at_cursor(state)
 	local row = vim.api.nvim_win_get_cursor(state.sidebar_win)[1]
 	return state.rows[row]
+end
+
+function M.toggle(state, path)
+	state.collapsed[path] = not state.collapsed[path] or nil
+	M.render(state)
+	for row, item in pairs(state.rows) do
+		if item.dir == path then
+			vim.api.nvim_win_set_cursor(state.sidebar_win, { row, 0 })
+		end
+	end
+end
+
+-- Expand any collapsed folder hiding the file, so the selection stays visible.
+function M.reveal(state, path)
+	local changed = false
+	for dir in pairs(state.collapsed) do
+		if vim.startswith(path, dir .. "/") then
+			state.collapsed[dir] = nil
+			changed = true
+		end
+	end
+	if changed then
+		M.render(state)
+	end
 end
 
 return M

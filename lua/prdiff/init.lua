@@ -53,7 +53,7 @@ end
 
 local function set_win_opts(win, opts)
 	for k, v in pairs(opts) do
-		vim.wo[win][k] = v
+		vim.wo[win][0][k] = v
 	end
 end
 
@@ -76,9 +76,10 @@ function M.show(idx, focus)
 	state.current = idx
 	local text = git.diff(state.root, state.base.sha, file, M.config.context)
 	layout().render(state.diff_buf, file, text)
-	vim.wo[state.diff_win].winbar = winbar(file)
+	vim.wo[state.diff_win][0].winbar = winbar(file)
 	vim.api.nvim_win_set_cursor(state.diff_win, { 1, 0 })
-	sidebar.mark_current(state)
+	sidebar.reveal(state, file.path)
+	sidebar.mark_current(state, true)
 	if focus then
 		vim.api.nvim_set_current_win(state.diff_win)
 	end
@@ -120,23 +121,49 @@ local function step_hunk(delta)
 	end
 end
 
-local function open_file()
-	local file = state.files[state.current]
-	if not file then
+-- Window options the file split inherits from the diff window and must not keep.
+local inherited = { "number", "relativenumber", "signcolumn", "foldcolumn", "wrap", "list", "spell", "cursorline", "statuscolumn", "winbar", "winfixwidth" }
+
+local function file_window()
+	if state.file_win and vim.api.nvim_win_is_valid(state.file_win) then
+		return state.file_win
+	end
+	local win = vim.api.nvim_open_win(0, false, { split = "right", win = state.diff_win })
+	vim.api.nvim_win_call(win, function()
+		for _, opt in ipairs(inherited) do
+			vim.cmd("setlocal " .. opt .. "<")
+		end
+	end)
+	state.file_win = win
+	return win
+end
+
+function M.open_file()
+	if not is_open() then
 		return
 	end
+	local win = vim.api.nvim_get_current_win()
+	if win == state.sidebar_win then
+		local item = sidebar.item_at_cursor(state)
+		if not (item and item.file) then
+			return
+		end
+		if item.file ~= state.current then
+			M.show(item.file, false)
+		end
+	end
+	local file = state.files[state.current]
 	if file.status == "D" then
 		vim.notify("prdiff: file was deleted", vim.log.levels.WARN)
 		return
 	end
-	local lnum = layout().target_line(state.diff_buf, vim.api.nvim_win_get_cursor(state.diff_win)[1])
-	if state.origin_tab and vim.api.nvim_tabpage_is_valid(state.origin_tab) then
-		vim.api.nvim_set_current_tabpage(state.origin_tab)
-	else
-		vim.cmd("tabnew")
-	end
+	local row = win == state.diff_win and vim.api.nvim_win_get_cursor(win)[1] or 1
+	local lnum = layout().target_line(state.diff_buf, row)
+
+	local target = file_window()
+	vim.api.nvim_set_current_win(target)
 	vim.cmd.edit(vim.fn.fnameescape(state.root .. "/" .. file.path))
-	pcall(vim.api.nvim_win_set_cursor, 0, { lnum, 0 })
+	pcall(vim.api.nvim_win_set_cursor, target, { lnum, 0 })
 	vim.cmd("normal! zz")
 end
 
@@ -159,18 +186,21 @@ local function keymaps()
 		end, "previous file")
 		map(buf, "g?", function()
 			vim.notify(table.concat({
-				"Sidebar: <CR> open diff · o preview · <Tab> focus diff",
-				"Diff:    ]c/[c hunk · gf/<CR> open file at line · <Tab> focus sidebar",
-				"Both:    ]f/[f file · R refresh · q close",
+				"Sidebar: <CR> open diff / toggle folder · o preview · <Tab> focus diff",
+				"Diff:    ]c/[c hunk · <CR> open file at line · <Tab> focus sidebar",
+				"Both:    gf open file in right split · ]f/[f file · R refresh · q close",
 			}, "\n"))
 		end, "help")
+		map(buf, "gf", M.open_file, "open file in split")
 	end
 
 	local function from_cursor(focus)
 		return function()
-			local idx = sidebar.file_at_cursor(state)
-			if idx then
-				M.show(idx, focus)
+			local item = sidebar.item_at_cursor(state)
+			if item and item.dir then
+				sidebar.toggle(state, item.dir)
+			elseif item then
+				M.show(item.file, focus)
 			end
 		end
 	end
@@ -187,8 +217,7 @@ local function keymaps()
 	map(db, "[c", function()
 		step_hunk(-1)
 	end, "previous hunk")
-	map(db, "gf", open_file, "open file")
-	map(db, "<CR>", open_file, "open file")
+	map(db, "<CR>", M.open_file, "open file in split")
 	map(db, "<Tab>", function()
 		vim.api.nvim_set_current_win(state.sidebar_win)
 	end, "focus sidebar")
@@ -252,7 +281,6 @@ function M.open(ref)
 		return
 	end
 
-	local origin_tab = vim.api.nvim_get_current_tabpage()
 	vim.cmd("tabnew")
 	local tab = vim.api.nvim_get_current_tabpage()
 	local diff_win = vim.api.nvim_get_current_win()
@@ -274,7 +302,7 @@ function M.open(ref)
 
 	state = {
 		tab = tab,
-		origin_tab = origin_tab,
+		collapsed = {},
 		root = root,
 		ref = ref,
 		base = base,
@@ -328,6 +356,7 @@ function M.setup(opts)
 		end,
 	})
 	vim.api.nvim_create_user_command("PrDiffClose", M.close, { desc = "Close the PR diff view" })
+	vim.api.nvim_create_user_command("PrDiffFile", M.open_file, { desc = "Open the selected file in a split" })
 end
 
 return M
